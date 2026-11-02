@@ -1,7 +1,7 @@
 FROM python:3.12-slim
 # LibreOffice (calcul des numéros de page du sommaire), poppler (lecture PDF) et polices arabes/latines
 RUN apt-get update && apt-get install -y --no-install-recommends \
-      libreoffice-writer poppler-utils fonts-liberation fonts-noto-core fonts-noto-naskh-arabic fonts-kacst \
+     libreoffice-writer poppler-utils fonts-liberation fonts-noto-core fonts-dejavu-core \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY requirements.txt .
