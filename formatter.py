@@ -610,10 +610,19 @@ class Formatter:
         pf.line_spacing = b["line_spacing"]
         pf.space_after = Pt(b["space_after_pt"])
         pf.space_before = Pt(0)
-        # titres
+        # titres : certains fichiers Word (notamment modèles personnalisés/arabisés)
+        # ne contiennent pas tous les styles intégrés Heading 1..4. Les créer au besoin
+        # évite qu'un niveau absent (ex. Heading 4) fasse échouer toute la mise en forme.
         for lvl in range(1, HEADING_MAX_LEVEL + 1):
             h = r["headings"][str(lvl)]
-            st = doc.styles["Heading %d" % lvl]
+            style_name = "Heading %d" % lvl
+            try:
+                st = doc.styles[style_name]
+            except KeyError:
+                st = doc.styles.add_style(style_name, WD_STYLE_TYPE.PARAGRAPH)
+                st.base_style = doc.styles["Heading %d" % (lvl - 1)] if lvl > 1 else normal
+                ppr = st.element.get_or_add_pPr()
+                ordered_set(ppr, w_el("outlineLvl", val=lvl - 1), PPR_ORDER)
             rpr = st.element.get_or_add_rPr()
             for t in ("color", "caps", "smallCaps", "u", "i", "iCs", "spacing"):
                 strip_rpr(rpr, [t])
