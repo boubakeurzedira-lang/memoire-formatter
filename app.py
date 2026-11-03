@@ -94,7 +94,10 @@ def format_endpoint():
     try:
         out, report = format_docx(f.read(), rules, with_pages=request.form.get("pages", "1") != "0")
     except Exception as e:
-        return jsonify(error="échec de la mise en forme: %s" % e), 422
+        import traceback
+        traceback.print_exc()
+        app.logger.error("format failed: %r", e)
+        return jsonify(error="échec de la mise en forme: %r" % e), 422
     summary = {k: report[k] for k in ("cover_detected", "has_chapters", "uncertain_headings",
                                        "toc_pages_estimated", "counts", "warnings")}
     resp = Response(out, mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
