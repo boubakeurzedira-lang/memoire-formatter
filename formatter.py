@@ -603,7 +603,16 @@ class Formatter:
             if rpr is not None:
                 set_rpr_fonts(rpr, lat, ara, b["size_latin"], b["size_arabic"])
                 ordered_set(rpr, w_el("lang", val=r["language"]["latin"], bidi=r["language"]["arabic"]), RPR_ORDER)
-        normal = doc.styles["Normal"]
+        def ensure_style(name, base=None):
+            try:
+                return doc.styles[name]
+            except KeyError:
+                s = doc.styles.add_style(name, WD_STYLE_TYPE.PARAGRAPH)
+                if base is not None:
+                    s.base_style = base
+                return s
+        
+        normal = ensure_style("Normal")
         npr = normal.element.get_or_add_rPr()
         set_rpr_fonts(npr, lat, ara, b["size_latin"], b["size_arabic"], bold=False, italic=False)
         pf = normal.paragraph_format
@@ -650,7 +659,7 @@ class Formatter:
         st.paragraph_format.page_break_before = bool(ft.get("page_break_before"))
         # légendes
         cap = r["caption"]
-        cst = doc.styles["Caption"]
+        cst = ensure_style("Caption", normal)
         rpr = cst.element.get_or_add_rPr()
         for t in ("color",):
             strip_rpr(rpr, [t])
